@@ -1,0 +1,78 @@
+.custom-widget {
+    background-color: lightgrey;
+    padding: 0px 2px;
+}
+.widget-glabel {
+    width: 120px;
+    height: 30px;
+    border: none;
+    margin: 0px 10px 10px 0;
+    color: green;
+}
+.widget-blabel {
+    width: 140px;
+    height: 30px;
+    border: none;
+    margin: 0px 5px 10px 0;
+    color: blue;
+}
+.widget-number {
+    background-color: #eee;
+    width: 140px;
+    height: 430px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+    overflow-y: hidden;
+}
+.widget-num {
+    background-color: #eee;
+    width: 60px;
+    height: 30px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+}
+.widget-select {
+    background-color: #eee;
+    width: 100px;
+    height: 430px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+    overflow-y: hidden;
+}
+.widget-pftname {
+    background-color: #eee;
+    width: 260px;
+    height: 30px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+}
+
+.widget-input {
+    background-color: #eee;
+    width: 200px;
+    height: 30px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+}
+
+.widget-textarea {
+    overflow: hidden;
+    width: 500px;
+    height: 120px;
+    margin: 0px 10px 10px 0;
+    border: 1px solid blue;
+}
+
+.widget-button {
+    background-color: #4CAF50;
+    width: 120px;
+    height: 35px;
+    border: 1px solid blue;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
