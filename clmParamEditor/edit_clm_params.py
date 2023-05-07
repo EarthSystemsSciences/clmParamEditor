@@ -30,6 +30,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
 
     # widget model attributes
     username = Unicode()
+    saverequest = Unicode('').tag(sync=True)
     
     clmnc_file = Unicode('./data/clm_params_files/clm_params_c180312.nc').tag(sync=True)
     newclmnc_file = Unicode('new_clm_file.nc').tag(sync=True)
@@ -50,27 +51,31 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
     def _username_default(self):
         return getpass.getuser()
     
-    # @observe('clmnc_file')
-    def _on_clmnc_file_changed(self, change):
-        print(f"{change.name} changed from {change.old} to {change.new}")
-        self.read_netCDF_data(change.new)
-
     # To do something when a trait attribute is changed, decorate a method with traitlets.observe().
-    # @observe('r_mort')
-    def _on_r_mort_changed(self, change):
+    # @observe('saverequest')
+    def _on_saverequest_changed(self, change):
         """
         This callback is passed the following dictionary when called:
         {
           'owner': object,  # The HasTraits instance
           'new': 0.03,         # The new value
           'old': 0.02,         # The old value
-          'name': "r_mort",    # The name of the changed trait
+          'name': "saverequest",    # The name of the changed trait
           'type': 'change', # The event type of the notification, usually 'change'
         }
         """
-        self.send({'event': 'r_mort_changed', 'new_value': change.new})
         print(f"{change.name} changed from {change.old} to {change.new}")
-
+        self.save_netCDF_file(change.name, change.new)
+    
+    # @observe('clmnc_file')
+    def _on_clmnc_file_changed(self, change):
+        print(f"{change.name} changed from {change.old} to {change.new}")
+        self.read_netCDF_data(change.new)
+    
+    # @observe('r_mort')
+    def _on_r_mort_changed(self, change):
+        print(f"{change.name} changed from {change.old} to {change.new}")
+        self.send({'event': 'r_mort_changed', 'new_value': change.new})
     # @observe('slatop')
     def _on_slatop_changed(self, change):
         self.send({'event': 'slatop_changed', 'new_value': change.new})
@@ -107,6 +112,8 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         This method sends a message to the frontend using the self.send method, with a custom event name,
         e.g., 'slatop_changed' and the new value of the slatop traitlet.
         """
+
+        self.observe(self._on_saverequest_changed, names='saverequest')
         self.observe(self._on_clmnc_file_changed, names='clmnc_file')
         self.observe(self._on_r_mort_changed, names='r_mort')
         self.observe(self._on_slatop_changed, names='slatop')
@@ -115,13 +122,13 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         self.observe(self._on_froot_leaf_changed, names='froot_leaf')
         self.observe(self._on_leafcn_changed, names='leafcn')
 
+
     def read_netCDF_data(self, clmncfile):
         if clmncfile and os.path.isfile(clmncfile):
-            print(f'clm file to be read: {clmncfile}')
+            print(f'clm file to read from: {clmncfile}')
             with netCDF4.Dataset(clmncfile) as clm_dataset:
                 # print(clm_dataset.variables['r_mort'][:][0])
                 self.r_mort = str(clm_dataset.variables['r_mort'][:][0])
-                # print(clm_dataset.variables['slatop'][:])
                 # EditCLMParamWidget.slatop = clm_dataset.variables['slatop'][:]
                 self.slatop = clm_dataset.variables['slatop'][:].tolist()
                 # print(clm_dataset.variables['flnr'][:])
@@ -130,8 +137,24 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
                 self.frootcn = clm_dataset.variables['frootcn'][:].tolist()
                 # print(clm_dataset.variables['froot_leaf'][:])
                 self.froot_leaf = clm_dataset.variables['froot_leaf'][:].tolist()
-                print(clm_dataset.variables['leafcn'][:])
+                # print(clm_dataset.variables['leafcn'][:])
                 self.leafcn = clm_dataset.variables['leafcn'][:].tolist()
         else:
             print(f'clm file: {clmncfile} does not exist!')
             print(f'clm file is of type {type(clmncfile)}!')
+
+
+    def save_netCDF_file(self, req_name, new_clmncfile):
+        if req_name == 'saverequest' and new_clmncfile and os.path.isfile(new_clmncfile):
+            print(f'clm file to save to: {new_clmncfile}')
+            with netCDF4.Dataset(new_clmncfile) as new_clm_dataset:
+                new_clm_dataset.variables['r_mort'] = self.r_mort
+                # new_clm_dataset.variables['slatop'] = EditCLMParamWidget.slatop
+                new_clm_dataset.variables['slatop'] = self.slatop
+                new_clm_dataset.variables['flnr'] = self.flnr
+                new_clm_dataset.variables['frootcn'] = self.frootcn
+                new_clm_dataset.variables['froot_leaf'] = self.froot_leaf
+                new_clm_dataset.variables['leafcn'] = self.leafcn
+        else:
+            print(f'clm file: {new_clmncfile} does not exist!')
+            print(f'clm file is of type {type(new_clmncfile)}!')

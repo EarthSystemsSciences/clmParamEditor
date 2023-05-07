@@ -26,6 +26,8 @@ export class EditCLMParamModel extends DOMWidgetModel {
       _view_name: EditCLMParamModel.view_name,
       _view_module: EditCLMParamModel.view_module,
       _view_module_version: EditCLMParamModel.view_module_version,
+        
+      saverequest: '',
 
       pftname: [
           "not_vegetated                           ",
@@ -59,13 +61,13 @@ export class EditCLMParamModel extends DOMWidgetModel {
   static serializers: ISerializers = {
     ...DOMWidgetModel.serializers,
     // Add any extra serializers here
-    /*
+
     slatop: { deserialize: (value: any) => value },  // List.serializers,
     flnr: { deserialize: (value: any) => value },  //List.serializers,
     frootcn: { deserialize: (value: any) => value }, // List.serializers,
     froot_leaf: { deserialize: (value: any) => value }, // List.serializers,
     leafcn: { deserialize: (value: any) => value }  // List.serializers
-    */
+
   };
 
   static model_name = 'EditCLMParamModel';
@@ -81,26 +83,36 @@ export class EditCLMParamModel extends DOMWidgetModel {
   }
 
   handleCustomMessage(msg: any) {
-    alert("Received a msg:" + msg);
-    if (msg.content.event === 'slatop_changed') {
-        const newData = msg.content.new_value;
-        this.set('slatop', newData);
-    }
-    if (msg.content.event === 'flnr_changed') {
-        const newData = msg.content.new_value;
-        this.set('flnr', newData);
-    }
-    if (msg.content.event === 'frootcn_changed') {
-        const newData = msg.content.new_value;
-        this.set('frootcn', newData);
-    }
-    if (msg.content.event === 'froot_leaf_changed') {
-        const newData = msg.content.new_value;
-        this.set('froot_leaf', newData);
-    }
-    if (msg.content.event === 'leafcn_changed') {
-        const newData = msg.content.new_value;
-        this.set('leafcn', newData);
+    const evt = msg.content.event;
+    const newData = msg.content.new_value;
+    alert("Received a msg: " + evt);
+    alert("New data = " + newData);
+
+    switch(evt) {
+        case 'slatop_changed': {
+            this.set('slatop', newData);
+            break;
+        }
+        case 'flnr_changed': {
+            this.set('flnr', newData);
+            break;
+        }
+        case 'frootcn_changed': {
+            this.set('frootcn', newData);
+            break;
+        }
+        case 'froot_leaf_changed': {
+            this.set('froot_leaf', newData);
+            break;
+        }
+        case 'leafcn_changed': {
+            this.set('leafcn', newData);
+            break;
+        }
+        default: {  
+            console.log("Received a msg: " + evt + "  with New data: " + newData);
+            break;  
+        }  
     }
     if (msg.content.event.includes('_changed')) {
         this.save_changes();
@@ -113,6 +125,7 @@ export class EditCLMParamView extends DOMWidgetView {
   private _div1: HTMLDivElement;
   private _div2: HTMLDivElement;
   private _div3: HTMLDivElement;
+  private _div4: HTMLDivElement;
 
   private _clm_filelbl: HTMLInputElement;
   private _clm_original_file: HTMLInputElement;
@@ -129,6 +142,8 @@ export class EditCLMParamView extends DOMWidgetView {
   private _rmortlbl: HTMLInputElement;
   private _r_mort: HTMLInputElement;
 
+  private _savefilebtn: HTMLInputElement;
+
   render() {
     this._div0 = document.createElement('div');
     this._div0.classList.add('widget-container', 'widget-box');
@@ -138,6 +153,8 @@ export class EditCLMParamView extends DOMWidgetView {
     this._div2.classList.add('widget-container', 'widget-box');
     this._div3 = document.createElement('div');
     this._div3.classList.add('widget-container', 'widget-box');
+    this._div4 = document.createElement('div');
+    this._div4.classList.add('widget-container', 'widget-box');
 
     this._clm_filelbl = document.createElement('input');
     this._clm_filelbl.type = 'label';
@@ -158,14 +175,14 @@ export class EditCLMParamView extends DOMWidgetView {
     this._clm_newlbl.value = 'Save to new file: ';
     this._clm_newlbl.disabled = true;
     this._clm_newlbl.classList.add('widget-glabel');
-    this._div0.appendChild(this._clm_newlbl);
+    this._div4.appendChild(this._clm_newlbl);
 
     this._clm_new_file = document.createElement('input');
     this._clm_new_file.type = 'text';
-    this._clm_new_file.value = this.model.get('newclmnc_file');  //'new_' + this.model.get('clmnc_file');
+    this._clm_new_file.value = this.model.get('newclmnc_file');
     this._clm_new_file.disabled = false;
     this._clm_new_file.classList.add('widget-input');
-    this._div0.appendChild(this._clm_new_file);
+    this._div4.appendChild(this._clm_new_file);
 
     // Create select element
 
@@ -231,11 +248,28 @@ export class EditCLMParamView extends DOMWidgetView {
     this._leafcn.classList.add('widget-number');
     this._div3.appendChild(this._leafcn);
 
+    this._savefilebtn = document.createElement('input');
+    this._savefilebtn.type = 'Submit';
+    this._savefilebtn.value = 'Save to New .nc file';
+    this._savefilebtn.classList.add(
+        'widget-button',
+    );
+    this._savefilebtn.setAttribute('href', '#');
+    this._savefilebtn.setAttribute('title', 'Save changes to a new .nc file');
+    this._savefilebtn.style.outline = 'none';
+    this._savefilebtn.addEventListener(
+        'click',
+        this._onsavebuttonClicked()
+    );
+    this._div4.appendChild(this._savefilebtn);
+      
+
     // Attach DOM to el
     this.el.appendChild(this._div0);
     this.el.appendChild(this._div1);
     this.el.appendChild(this._div2);
     this.el.appendChild(this._div3);
+    this.el.appendChild(this._div4);
     this.el.classList.add('custom-widget');
 
     
@@ -269,41 +303,44 @@ export class EditCLMParamView extends DOMWidgetView {
 
   // get (Python -> JavaScript update)
   private _onOriginalFileChanged() {
-    this._clm_original_file.value = this.model.get('clmnc_file');
+    const neworgclm = this.model.get('clmnc_file')
+    this._clm_original_file.value = neworgclm;
+    //alert('original clm file' + ' is changed to new value: ' + neworgclm);
   }
   private _onNewFileChanged() {
-    this._clm_new_file.value = this.model.get('newclmnc_file');
+    const newnewclm = this.model.get('newclmnc_file');
+    this._clm_new_file.value = newnewclm;
+    //alert('new clm file' + ' is changed to new value: ' + newnewclm);
   }
-
   private _onSlatopChanged() {
     const newSlatop: number[] = this.model.get('slatop');
+    alert('slatop' + ' is changed to new value: ' + newSlatop);
     this._create_dropdown2(newSlatop, this._slatop);
-    this.send({ event: 'slatop_changed', new_value: newSlatop });
   }
   private _onFlnrChanged() {
     const newFlnr: number[] = this.model.get('flnr');
+    alert('flnr' + ' is changed to new value: ' + newFlnr);
     this._create_dropdown2(newFlnr, this._flnr);
-    this.send({ event: 'flnr_changed', new_value: newFlnr });
   }
   private _onFrootCNChanged() {
     const newFrootcn: number[] = this.model.get('frootcn');
+    alert('frootcn' + ' is changed to new value: ' + newFrootcn);
     this._create_dropdown2(newFrootcn, this._frootcn);
-    this.send({ event: 'frootcn_changed', new_value: newFrootcn });
   }
   private _onFrootLeafChanged() {
     const newFrootLeaf: number[] = this.model.get('froot_leaf');
+    alert('froot_leaf' + ' is changed to new value: ' + newFrootLeaf);
     this._create_dropdown2(newFrootLeaf, this._froot_leaf);
-    this.send({ event: 'froot_leaf_changed', new_value: newFrootLeaf });
   }
   private _onLeafCNChanged() {
     const newLeafcn: number[] = this.model.get('leafcn');
-    alert('leafcn' + ' is changed to new value: ' + newLeafcn)
+    alert('leafcn' + ' is changed to new value: ' + newLeafcn);
     this._create_dropdown2(newLeafcn, this._leafcn);
-    this.send({ event: 'leafcn_changed', new_value: newLeafcn });
   }
   private _onRmortChanged() {
-    alert('r_mort' + ' is changed to new value: ' + this.model.get('r_mort'))
-    this._r_mort.value = this.model.get('r_mort');
+    const new_rmort = this.model.get('r_mort');
+    alert('r_mort' + ' is changed to new value: ' + new_rmort);
+    this._r_mort.value = new_rmort;
   }
 
   // Define a function to create editable options
@@ -332,11 +369,15 @@ export class EditCLMParamView extends DOMWidgetView {
     }
   }
   private _create_dropdown2(items: number[], dom_sel: HTMLSelectElement) {
+    //alert('First, remove all of the children of the dropdown');
+    while (dom_sel.firstChild) {
+      dom_sel.removeChild(dom_sel.firstChild);
+    }
+    //alert('Second, recreate the new children of the dropdown');
     for (const index in items) {
       const optionElement = this._createEditableOption(+index, items[index]);
       dom_sel.appendChild(optionElement);
     }
-    //dom_sel.selectedIndex = 0;
     dom_sel.disabled = false;
     dom_sel.size = 25;
     dom_sel.addEventListener("scroll", function(event) {
@@ -412,4 +453,11 @@ export class EditCLMParamView extends DOMWidgetView {
     return arr_ret;
   }
 
+  private _onsavebuttonClicked() {
+    return (_event: Event): void => {
+        this.model.set('saverequest', 'save');
+        console.log(this.model.get('saverequest'));
+        this.model.save_changes();
+    };
+  }
 }

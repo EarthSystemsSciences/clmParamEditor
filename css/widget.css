@@ -6,7 +6,7 @@
     width: 120px;
     height: 30px;
     border: none;
-    margin: 0px 10px 10px 0;
+    margin: 0px 5px 10px 0;
     color: green;
 }
 .widget-blabel {
@@ -49,7 +49,7 @@
 
 .widget-input {
     background-color: #eee;
-    width: 200px;
+    width: 400px;
     height: 30px;
     margin: 0px 10px 10px 0;
     border: 1px solid blue;
@@ -66,7 +66,7 @@
 .widget-button {
     background-color: #4CAF50;
     width: 120px;
-    height: 35px;
+    height: 28px;
     border: 1px solid blue;
     color: white;
     padding: 5px;
