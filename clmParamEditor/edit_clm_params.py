@@ -165,9 +165,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
             if os.path.exists(new_ncfile):
                 print(f'Save the modified netCDF data to: {new_ncfile}')
                 nc_dataset = netCDF4.Dataset(new_ncfile, mode='r+')
-                print(f"*****r_mort value to be saved: {self.r_mort}')
-                nc_dataset.variables['r_mort'][:][0] = float(self.r_mort)
-                print(f"*****r_mort value saved: {nc_dataset.variables['r_mort'][:][0]}')
+                nc_dataset.variables['r_mort'][:] = self.r_mort
                 nc_dataset.variables['slatop'][:] = self.slatop
                 nc_dataset.variables['flnr'][:] = self.flnr
                 nc_dataset.variables['frootcn'][:] = self.frootcn
