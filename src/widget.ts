@@ -28,6 +28,7 @@ export class EditCLMParamModel extends DOMWidgetModel {
       _view_module_version: EditCLMParamModel.view_module_version,
         
       saverequest: '',
+      sel_size: 25,
 
       pftname: [
           "not_vegetated                           ",
@@ -311,27 +312,27 @@ export class EditCLMParamView extends DOMWidgetView {
   }
   private _onSlatopChanged() {
     const newSlatop: number[] = this.model.get('slatop');
-    alert('slatop' + ' is changed to new value: ' + newSlatop);
+    //alert('slatop' + ' is changed to new value: ' + newSlatop);
     this._create_dropdown2(newSlatop, this._slatop);
   }
   private _onFlnrChanged() {
     const newFlnr: number[] = this.model.get('flnr');
-    alert('flnr' + ' is changed to new value: ' + newFlnr);
+    //alert('flnr' + ' is changed to new value: ' + newFlnr);
     this._create_dropdown2(newFlnr, this._flnr);
   }
   private _onFrootCNChanged() {
     const newFrootcn: number[] = this.model.get('frootcn');
-    alert('frootcn' + ' is changed to new value: ' + newFrootcn);
+    //alert('frootcn' + ' is changed to new value: ' + newFrootcn);
     this._create_dropdown2(newFrootcn, this._frootcn);
   }
   private _onFrootLeafChanged() {
     const newFrootLeaf: number[] = this.model.get('froot_leaf');
-    alert('froot_leaf' + ' is changed to new value: ' + newFrootLeaf);
+    //alert('froot_leaf' + ' is changed to new value: ' + newFrootLeaf);
     this._create_dropdown2(newFrootLeaf, this._froot_leaf);
   }
   private _onLeafCNChanged() {
     const newLeafcn: number[] = this.model.get('leafcn');
-    alert('leafcn' + ' is changed to new value: ' + newLeafcn);
+    //alert('leafcn' + ' is changed to new value: ' + newLeafcn);
     this._create_dropdown2(newLeafcn, this._leafcn);
   }
   private _onRmortChanged() {
@@ -365,17 +366,19 @@ export class EditCLMParamView extends DOMWidgetView {
     }
   }
   private _create_dropdown2(items: number[], dom_sel: HTMLSelectElement) {
-    //alert('First, remove all of the children of the dropdown');
+    // alert('First, remove all of the children of the dropdown');
     while (dom_sel.firstChild) {
       dom_sel.removeChild(dom_sel.firstChild);
     }
     //alert('Second, recreate the new children of the dropdown');
     for (const index in items) {
-      const optionElement = this._createEditableOption(+index, items[index]);
-      dom_sel.appendChild(optionElement);
+      if(index < this.model.get('sel_size') && items[index] != null) {
+          const optionElement = this._createEditableOption(+index, items[index]);
+          dom_sel.appendChild(optionElement);
+      }
     }
     dom_sel.disabled = false;
-    dom_sel.size = 25;
+    dom_sel.size = this.model.get('sel_size');
     dom_sel.addEventListener("scroll", function(event) {
         event.preventDefault();
         return false;
@@ -428,7 +431,6 @@ export class EditCLMParamView extends DOMWidgetView {
   }
   private _onLeafCNInputChanged() {
     this.model.set('leafcn', this.options_to_array(this._leafcn.options));
-    console.log(this.model.get('leafcn'));
     this.model.save_changes();
   }
   private _onRmortInputChanged() {
@@ -446,7 +448,8 @@ export class EditCLMParamView extends DOMWidgetView {
             }
         }
     }
-    return arr_ret;
+    // Only take the first this.model.get('sel_size') items because the rest would be 'NaN'.
+    return arr_ret.slice(0, this.model.get('sel_size'));
   }
 
   private _onsavebuttonClicked() {
@@ -454,6 +457,14 @@ export class EditCLMParamView extends DOMWidgetView {
         console.log(this.model.get('saverequest'));
         this.model.set('saverequest', 'save');
         console.log(this.model.get('saverequest'));
+
+        this._onSlatopInputChanged();
+        this._onFlnrInputChanged();
+        this._onFrootCNInputChanged();
+        this._onFrootLeafInputChanged();
+        this._onLeafCNInputChanged();
+        this._onRmortInputChanged();
+        
         this.model.save_changes();
     };
   }

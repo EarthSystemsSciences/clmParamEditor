@@ -156,11 +156,11 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
             print(f'Save the modified netCDF data to: {new_ncfile}')
             nc_dataset = netCDF4.Dataset(new_ncfile, mode='r+')
             nc_dataset.variables['r_mort'][:][0] = float(self.r_mort)
-            nc_dataset.variables['slatop'][:] = np.ma.masked_array(self.slatop)
-            nc_dataset.variables['flnr'][:] = np.ma.masked_array(self.flnr)
-            nc_dataset.variables['frootcn'][:] = np.ma.masked_array(self.frootcn)
-            nc_dataset.variables['froot_leaf'][:] = np.ma.masked_array(self.froot_leaf)
-            nc_dataset.variables['leafcn'][:] = np.ma.masked_array(self.leafcn)
+            nc_dataset.variables['slatop'][:] = self.slatop
+            nc_dataset.variables['flnr'][:] = self.flnr
+            nc_dataset.variables['frootcn'][:] = self.frootcn
+            nc_dataset.variables['froot_leaf'][:] = self.froot_leaf
+            nc_dataset.variables['leafcn'][:] = self.leafcn
             print(f'New parameter file has been saved to {new_ncfile}')
 
         else:
