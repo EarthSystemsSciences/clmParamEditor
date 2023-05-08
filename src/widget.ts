@@ -185,7 +185,6 @@ export class EditCLMParamView extends DOMWidgetView {
     this._div4.appendChild(this._clm_new_file);
 
     // Create select element
-
     this._pftnamelbl = document.createElement('input');
     this._pftnamelbl.type = 'label';
     this._pftnamelbl.value = 'plant function type: ';
@@ -193,8 +192,6 @@ export class EditCLMParamView extends DOMWidgetView {
     this._pftnamelbl.classList.add('widget-blabel');
     this._div1.appendChild(this._pftnamelbl);
 
-    const list = this.model.get('pftname');
-    console.log(list);
     this._pftname = document.createElement('select'); 
     this._create_dropdown1(this.model.get('pftname'));
     this._pftname.selectedIndex = 0;
@@ -251,6 +248,7 @@ export class EditCLMParamView extends DOMWidgetView {
     this._savefilebtn = document.createElement('input');
     this._savefilebtn.type = 'Submit';
     this._savefilebtn.value = 'Save to New .nc file';
+    this._savefilebtn.disabled = false;
     this._savefilebtn.classList.add(
         'widget-button',
     );
@@ -286,7 +284,6 @@ export class EditCLMParamView extends DOMWidgetView {
 
     // JavaScript -> Python update
     // Listening to changes of the widget's own DOM attribute changes
-    // this.listenTo(this.model, 'change:slatop', this._onSlatopInputChanged, this);
     this._clm_original_file.onchange = this._onOriginalFileInputChanged.bind(this);
     this._clm_new_file.onchange = this._onNewFileInputChanged.bind(this);
     this._pftname.onchange = this._onPftnameInputChanged.bind(this);
@@ -360,7 +357,6 @@ export class EditCLMParamView extends DOMWidgetView {
   }
 
   private _create_dropdown1(items: string[]) {
-    console.log(items);
     for (const index in items) {
       const optionElement = document.createElement("option");
       optionElement.value = index;
@@ -455,6 +451,7 @@ export class EditCLMParamView extends DOMWidgetView {
 
   private _onsavebuttonClicked() {
     return (_event: Event): void => {
+        console.log(this.model.get('saverequest'));
         this.model.set('saverequest', 'save');
         console.log(this.model.get('saverequest'));
         this.model.save_changes();

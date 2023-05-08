@@ -16,6 +16,7 @@ import netCDF4
 import numpy as np
 import os
 import getpass
+import xarray as xr
 
 
 class EditCLMParamWidget(DOMWidget, HasTraits):
@@ -30,9 +31,9 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
 
     # widget model attributes
     username = Unicode()
-    saverequest = Unicode('').tag(sync=True)
+    saverequest = Unicode('clickable').tag(sync=True)
     
-    clmnc_file = Unicode('./data/clm_params_files/clm_params_c180312.nc').tag(sync=True)
+    clmnc_file = Unicode('data/clm_params_files/clm_params_c180312.nc').tag(sync=True)
     newclmnc_file = Unicode('new_clm_file.nc').tag(sync=True)
     
     # six parameters to expose for editing
@@ -46,7 +47,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
     froot_leaf = List([]).tag(sync=True)
     leafcn = List([]).tag(sync=True)
 
-    # To calculate a default value dynamically, decorate a method of your class with @default({traitname}).
+    # To get a default value dynamically, decorate a class method with @default({traitname}).
     @default('username')
     def _username_default(self):
         return getpass.getuser()
@@ -65,45 +66,46 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         }
         """
         print(f"{change.name} changed from {change.old} to {change.new}")
-        self.save_netCDF_file(change.name, change.new)
+        if change.new == 'save':
+            self.save_netCDF_file(self.newclmnc_file)
     
     # @observe('clmnc_file')
     def _on_clmnc_file_changed(self, change):
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
         self.read_netCDF_data(change.new)
     
     # @observe('r_mort')
     def _on_r_mort_changed(self, change):
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
         self.send({'event': 'r_mort_changed', 'new_value': change.new})
     # @observe('slatop')
     def _on_slatop_changed(self, change):
         self.send({'event': 'slatop_changed', 'new_value': change.new})
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
 
     # @observe('flnr')
     def _on_flnr_changed(self, change):
         self.send({'event': 'flnr_changed', 'new_value': change.new})
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
 
     # @observe('frootcn')
     def _on_frootcn_changed(self, change):
         self.send({'event': 'frootcn_changed', 'new_value': change.new})
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
 
     # @observe('froot_leaf')
     def _on_froot_leaf_changed(self, change):
         self.send({'event': 'froot_leaf_changed', 'new_value': change.new})
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
 
     # @observe('leafcn')
     def _on_leafcn_changed(self, change):
         self.send({'event': 'leafcn_changed', 'new_value': change.new})
-        print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} changed from {change.old} to {change.new}")
 
 
     def __init__(self, **kwargs):
-        print("initializing the widget...")
+        # print("initializing the widget...")
         super().__init__(**kwargs)
         self.read_netCDF_data("./data/clm_params_files/clm_params_c180312.nc")
 
@@ -124,37 +126,66 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
 
 
     def read_netCDF_data(self, clmncfile):
-        if clmncfile and os.path.isfile(clmncfile):
-            print(f'clm file to read from: {clmncfile}')
-            with netCDF4.Dataset(clmncfile) as clm_dataset:
-                # print(clm_dataset.variables['r_mort'][:][0])
+        if clmncfile and os.path.exists(clmncfile):
+            # print(f'clm file to read from: {clmncfile}')
+            with netCDF4.Dataset(clmncfile, mode='r+') as clm_dataset:
                 self.r_mort = str(clm_dataset.variables['r_mort'][:][0])
-                # EditCLMParamWidget.slatop = clm_dataset.variables['slatop'][:]
                 self.slatop = clm_dataset.variables['slatop'][:].tolist()
-                # print(clm_dataset.variables['flnr'][:])
                 self.flnr = clm_dataset.variables['flnr'][:].tolist()
-                # print(clm_dataset.variables['frootcn'][:])
                 self.frootcn = clm_dataset.variables['frootcn'][:].tolist()
-                # print(clm_dataset.variables['froot_leaf'][:])
                 self.froot_leaf = clm_dataset.variables['froot_leaf'][:].tolist()
-                # print(clm_dataset.variables['leafcn'][:])
                 self.leafcn = clm_dataset.variables['leafcn'][:].tolist()
         else:
-            print(f'clm file: {clmncfile} does not exist!')
-            print(f'clm file is of type {type(clmncfile)}!')
+            print(f'File: {clmncfile} does not exist!')
 
+    def save_netCDF_file(self, new_ncfile):
+        # just to be safe, make sure dataset is not already open.
+        try: nc_dataset.close()
+        except: pass
 
-    def save_netCDF_file(self, req_name, new_clmncfile):
-        if req_name == 'saverequest' and new_clmncfile and os.path.isfile(new_clmncfile):
-            print(f'clm file to save to: {new_clmncfile}')
-            with netCDF4.Dataset(new_clmncfile) as new_clm_dataset:
-                new_clm_dataset.variables['r_mort'] = self.r_mort
-                # new_clm_dataset.variables['slatop'] = EditCLMParamWidget.slatop
-                new_clm_dataset.variables['slatop'] = self.slatop
-                new_clm_dataset.variables['flnr'] = self.flnr
-                new_clm_dataset.variables['frootcn'] = self.frootcn
-                new_clm_dataset.variables['froot_leaf'] = self.froot_leaf
-                new_clm_dataset.variables['leafcn'] = self.leafcn
+        # make a copy of the original nc file, so we can update the file
+        if new_ncfile == os.path.basename(new_ncfile):
+            new_ncfile = os.path.join(os.path.dirname(self.clmnc_file), new_ncfile)
+
+        print(f"Copying the original nc file from {self.clmnc_file}...to {new_ncfile}")
+        self.create_file_from_source(self.clmnc_file, new_ncfile)
+
+        # os.chmod(new_ncfile, 0o777)
+
+        if os.path.exists(new_ncfile):
+            print(f'Save the modified netCDF data to: {new_ncfile}')
+            nc_dataset = netCDF4.Dataset(new_ncfile, mode='r+')
+            nc_dataset.variables['r_mort'][:][0] = float(self.r_mort)
+            nc_dataset.variables['slatop'][:] = np.ma.masked_array(self.slatop)
+            nc_dataset.variables['flnr'][:] = np.ma.masked_array(self.flnr)
+            nc_dataset.variables['frootcn'][:] = np.ma.masked_array(self.frootcn)
+            nc_dataset.variables['froot_leaf'][:] = np.ma.masked_array(self.froot_leaf)
+            nc_dataset.variables['leafcn'][:] = np.ma.masked_array(self.leafcn)
+            print(f'New parameter file has been saved to {new_ncfile}')
+
         else:
-            print(f'clm file: {new_clmncfile} does not exist!')
-            print(f'clm file is of type {type(new_clmncfile)}!')
+            print(f'File: {new_ncfile} does not exist!')
+
+        self.saverequest = 'clickable'
+
+    def create_file_from_source(self, src_file, dst_file):
+        #input file to Dataset
+        with netCDF4.Dataset(src_file) as dsin:
+            #output file
+            dsout = netCDF4.Dataset(dst_file, "w", format="NETCDF3_CLASSIC")
+
+            #Copy dimensions
+            for dname, the_dim in dsin.dimensions.items():
+                #print(dname, len(the_dim))
+                dsout.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
+
+            # Copy variables
+            for v_name, varin in dsin.variables.items():
+                outVar = dsout.createVariable(v_name, varin.datatype, varin.dimensions)
+                #print(varin.datatype)
+    
+                # Copy variable attributes
+                outVar.setncatts({k: varin.getncattr(k) for k in varin.ncattrs()})   
+                outVar[:] = varin[:]
+        # close the output file
+        dsout.close()
