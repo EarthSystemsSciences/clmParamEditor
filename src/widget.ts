@@ -27,6 +27,7 @@ export class EditCLMParamModel extends DOMWidgetModel {
       _view_module: EditCLMParamModel.view_module,
       _view_module_version: EditCLMParamModel.view_module_version,
         
+      readrequest: '',
       saverequest: '',
       sel_size: 25,
 
@@ -143,6 +144,7 @@ export class EditCLMParamView extends DOMWidgetView {
   private _rmortlbl: HTMLInputElement;
   private _r_mort: HTMLInputElement;
 
+  private _readfilebtn: HTMLInputElement;
   private _savefilebtn: HTMLInputElement;
 
   render() {
@@ -246,6 +248,22 @@ export class EditCLMParamView extends DOMWidgetView {
     this._leafcn.classList.add('widget-number');
     this._div3.appendChild(this._leafcn);
 
+    this._readfilebtn = document.createElement('input');
+    this._readfilebtn.type = 'Submit';
+    this._readfilebtn.value = 'Read from a .nc file';
+    this._readfilebtn.disabled = false;
+    this._readfilebtn.classList.add(
+        'widget-button',
+    );
+    this._readfilebtn.setAttribute('href', '#');
+    this._readfilebtn.setAttribute('title', 'Read data from a .nc file');
+    this._readfilebtn.style.outline = 'none';
+    this._readfilebtn.addEventListener(
+        'click',
+        this._onreadbuttonClicked()
+    );
+    this._div0.appendChild(this._readfilebtn);
+
     this._savefilebtn = document.createElement('input');
     this._savefilebtn.type = 'Submit';
     this._savefilebtn.value = 'Save to New .nc file';
@@ -261,7 +279,6 @@ export class EditCLMParamView extends DOMWidgetView {
         this._onsavebuttonClicked()
     );
     this._div4.appendChild(this._savefilebtn);
-      
 
     // Attach DOM to el
     this.el.appendChild(this._div0);
@@ -452,6 +469,12 @@ export class EditCLMParamView extends DOMWidgetView {
     return arr_ret.slice(0, this.model.get('sel_size'));
   }
 
+  private _onreadbuttonClicked() {
+    return (_event: Event): void => {
+        this.model.set('readrequest', 'read');
+        this.model.save_changes();
+    };
+  }
   private _onsavebuttonClicked() {
     return (_event: Event): void => {
         console.log(this.model.get('saverequest'));

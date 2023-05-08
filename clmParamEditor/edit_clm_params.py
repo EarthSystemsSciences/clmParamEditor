@@ -31,6 +31,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
 
     # widget model attributes
     username = Unicode()
+    readrequest = Unicode('clickable').tag(sync=True)
     saverequest = Unicode('clickable').tag(sync=True)
     
     clmnc_file = Unicode('data/clm_params_files/clm_params_c180312.nc').tag(sync=True)
@@ -53,35 +54,40 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         return getpass.getuser()
     
     # To do something when a trait attribute is changed, decorate a method with traitlets.observe().
-    # @observe('saverequest')
-    def _on_saverequest_changed(self, change):
+    # @observe('readrequest')
+    def _on_readrequest_changed(self, change):
         """
         This callback is passed the following dictionary when called:
         {
           'owner': object,  # The HasTraits instance
-          'new': 0.03,         # The new value
-          'old': 0.02,         # The old value
-          'name': "saverequest",    # The name of the changed trait
+          'new': 'read',         # The new value
+          'old': 'clickable',         # The old value
+          'name': "readrequest",    # The name of the changed trait
           'type': 'change', # The event type of the notification, usually 'change'
         }
         """
         print(f"{change.name} changed from {change.old} to {change.new}")
+        if change.new == 'read':
+            self.read_netCDF_data(self.clmnc_file)
+
+    # @observe('saverequest')
+    def _on_saverequest_changed(self, change):
+        print(f"{change.name} value changed from {change.old} to {change.new}")
         if change.new == 'save':
             self.save_netCDF_file(self.newclmnc_file)
     
     # @observe('clmnc_file')
     def _on_clmnc_file_changed(self, change):
-        # print(f"{change.name} changed from {change.old} to {change.new}")
-        self.read_netCDF_data(change.new)
+        print(f"{change.name} value changed from {change.old} to {change.new}")
     
     # @observe('r_mort')
     def _on_r_mort_changed(self, change):
-        # print(f"{change.name} changed from {change.old} to {change.new}")
+        # print(f"{change.name} value changed from {change.old} to {change.new}")
         self.send({'event': 'r_mort_changed', 'new_value': change.new})
     # @observe('slatop')
     def _on_slatop_changed(self, change):
+        # print(f"{change.name} value changed from {change.old} to {change.new}")
         self.send({'event': 'slatop_changed', 'new_value': change.new})
-        # print(f"{change.name} changed from {change.old} to {change.new}")
 
     # @observe('flnr')
     def _on_flnr_changed(self, change):
@@ -115,6 +121,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         e.g., 'slatop_changed' and the new value of the slatop traitlet.
         """
 
+        self.observe(self._on_readrequest_changed, names='readrequest')
         self.observe(self._on_saverequest_changed, names='saverequest')
         self.observe(self._on_clmnc_file_changed, names='clmnc_file')
         self.observe(self._on_r_mort_changed, names='r_mort')
@@ -126,6 +133,10 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
 
 
     def read_netCDF_data(self, clmncfile):
+        # just to be safe, make sure dataset is not already open.
+        try: clm_dataset.close()
+        except: pass
+
         if clmncfile and os.path.exists(clmncfile):
             # print(f'clm file to read from: {clmncfile}')
             with netCDF4.Dataset(clmncfile, mode='r+') as clm_dataset:
@@ -137,6 +148,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
                 self.leafcn = clm_dataset.variables['leafcn'][:].tolist()
         else:
             print(f'File: {clmncfile} does not exist!')
+        self.readrequest = 'clickable'
 
     def save_netCDF_file(self, new_ncfile):
         # just to be safe, make sure dataset is not already open.
@@ -144,27 +156,30 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
         except: pass
 
         # make a copy of the original nc file, so we can update the file
-        if new_ncfile == os.path.basename(new_ncfile):
-            new_ncfile = os.path.join(os.path.dirname(self.clmnc_file), new_ncfile)
+        if new_ncfile:
+            print(f"Copying the original nc file from {self.clmnc_file}...to {new_ncfile}")
+            if new_ncfile == os.path.basename(new_ncfile):
+                new_ncfile = os.path.join(os.path.dirname(self.clmnc_file), new_ncfile)
+            self.create_file_from_source(self.clmnc_file, new_ncfile)
 
-        print(f"Copying the original nc file from {self.clmnc_file}...to {new_ncfile}")
-        self.create_file_from_source(self.clmnc_file, new_ncfile)
+            if os.path.exists(new_ncfile):
+                print(f'Save the modified netCDF data to: {new_ncfile}')
+                nc_dataset = netCDF4.Dataset(new_ncfile, mode='r+')
+                print(f"*****r_mort value to be saved: {self.r_mort}')
+                nc_dataset.variables['r_mort'][:][0] = float(self.r_mort)
+                print(f"*****r_mort value saved: {nc_dataset.variables['r_mort'][:][0]}')
+                nc_dataset.variables['slatop'][:] = self.slatop
+                nc_dataset.variables['flnr'][:] = self.flnr
+                nc_dataset.variables['frootcn'][:] = self.frootcn
+                nc_dataset.variables['froot_leaf'][:] = self.froot_leaf
+                nc_dataset.variables['leafcn'][:] = self.leafcn
+                print(f'New parameter file has been saved to {new_ncfile}')
+                nc_dataset.close()
 
-        # os.chmod(new_ncfile, 0o777)
-
-        if os.path.exists(new_ncfile):
-            print(f'Save the modified netCDF data to: {new_ncfile}')
-            nc_dataset = netCDF4.Dataset(new_ncfile, mode='r+')
-            nc_dataset.variables['r_mort'][:][0] = float(self.r_mort)
-            nc_dataset.variables['slatop'][:] = self.slatop
-            nc_dataset.variables['flnr'][:] = self.flnr
-            nc_dataset.variables['frootcn'][:] = self.frootcn
-            nc_dataset.variables['froot_leaf'][:] = self.froot_leaf
-            nc_dataset.variables['leafcn'][:] = self.leafcn
-            print(f'New parameter file has been saved to {new_ncfile}')
-
+            else:
+                print(f'File: {new_ncfile} does not exist!')
         else:
-            print(f'File: {new_ncfile} does not exist!')
+            print(f'File: {new_ncfile} is null!')
 
         self.saverequest = 'clickable'
 
