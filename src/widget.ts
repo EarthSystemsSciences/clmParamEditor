@@ -27,6 +27,7 @@ export class EditCLMParamModel extends DOMWidgetModel {
       _view_module: EditCLMParamModel.view_module,
       _view_module_version: EditCLMParamModel.view_module_version,
         
+      username: '',
       readrequest: '',
       saverequest: '',
       sel_size: 25,
@@ -128,6 +129,7 @@ export class EditCLMParamView extends DOMWidgetView {
   private _div2: HTMLDivElement;
   private _div3: HTMLDivElement;
   private _div4: HTMLDivElement;
+  private _div5: HTMLDivElement;
 
   private _clm_filelbl: HTMLInputElement;
   private _clm_original_file: HTMLInputElement;
@@ -143,6 +145,8 @@ export class EditCLMParamView extends DOMWidgetView {
   private _leafcn: HTMLSelectElement;
   private _rmortlbl: HTMLInputElement;
   private _r_mort: HTMLInputElement;
+  private _savestatuslbl: HTMLInputElement;
+  private _savestatus: HTMLTextAreaElement;
 
   private _readfilebtn: HTMLInputElement;
   private _savefilebtn: HTMLInputElement;
@@ -158,6 +162,8 @@ export class EditCLMParamView extends DOMWidgetView {
     this._div3.classList.add('widget-container', 'widget-box');
     this._div4 = document.createElement('div');
     this._div4.classList.add('widget-container', 'widget-box');
+    this._div5 = document.createElement('div');
+    this._div5.classList.add('widget-container', 'widget-box');
 
     this._clm_filelbl = document.createElement('input');
     this._clm_filelbl.type = 'label';
@@ -215,6 +221,23 @@ export class EditCLMParamView extends DOMWidgetView {
     this._r_mort.disabled = false;
     this._r_mort.classList.add('widget-num');
     this._div1.appendChild(this._r_mort);
+
+    this._savestatuslbl = document.createElement('input');
+    this._savestatuslbl.type = 'label';
+    this._savestatuslbl.value = 'File save status: ';
+    this._savestatuslbl.disabled = true;
+    this._savestatuslbl.classList.add('widget-glabel');
+    this._div5.appendChild(this._savestatuslbl);
+
+    this._savestatus = document.createElement('textarea');
+    this._savestatus.value = this.model.get('savestatus');
+    this._savestatus.disabled = true;
+    this._savestatus.setAttribute('rows', '2');
+    this._savestatus.setAttribute('cols', '130');
+    this._savestatus.setAttribute('wrap', 'hard');
+    this._savestatus.classList.add('widget-textarea');
+    this._div5.appendChild(this._savestatus);
+
 
     /* 6 variables: slatop; flnr; frootcn; froot_leaf; leafcn; r_mort*/
     const vars = ['Canopy SLA ', 'Rubisco N allocation', 'Fine root C:N', 'NewRoot C/NewLeaf C', 'Leaf C:N'];
@@ -286,6 +309,7 @@ export class EditCLMParamView extends DOMWidgetView {
     this.el.appendChild(this._div2);
     this.el.appendChild(this._div3);
     this.el.appendChild(this._div4);
+    this.el.appendChild(this._div5);
     this.el.classList.add('custom-widget');
 
     
@@ -299,6 +323,8 @@ export class EditCLMParamView extends DOMWidgetView {
     this.model.on('change:froot_leaf', this._onFrootLeafChanged, this);
     this.model.on('change:leafcn', this._onLeafCNChanged, this);
     this.model.on('change:r_mort', this._onRmortChanged, this);
+    this.model.on('change:savestatus', this._onSaveStatusChanged, this);
+    this.model.on('change:username', this._onUsernameChanged, this);
 
     // JavaScript -> Python update
     // Listening to changes of the widget's own DOM attribute changes
@@ -317,6 +343,10 @@ export class EditCLMParamView extends DOMWidgetView {
   /**** get/set and other helper methods for render()****/
 
   // get (Python -> JavaScript update)
+  private _onUsernameChanged() {
+    const newusernm = this.model.get('username')
+    //alert('Username' + ' is changed to new value: ' + newusernm);
+  }
   private _onOriginalFileChanged() {
     const neworgclm = this.model.get('clmnc_file')
     this._clm_original_file.value = neworgclm;
@@ -356,6 +386,11 @@ export class EditCLMParamView extends DOMWidgetView {
     const new_rmort = this.model.get('r_mort');
     this._r_mort.value = new_rmort;
     //alert('r_mort' + ' is changed to new value: ' + new_rmort);
+  }
+  private _onSaveStatusChanged() {
+    const new_savest = this.model.get('savestatus');
+    this._savestatus.value = new_savest;
+    //alert('savestatus' + ' is changed to new value: ' + new_savest);
   }
 
   // Define a function to create editable options
