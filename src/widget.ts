@@ -354,8 +354,8 @@ export class EditCLMParamView extends DOMWidgetView {
   }
   private _onRmortChanged() {
     const new_rmort = this.model.get('r_mort');
-    alert('r_mort' + ' is changed to new value: ' + new_rmort);
     this._r_mort.value = new_rmort;
+    //alert('r_mort' + ' is changed to new value: ' + new_rmort);
   }
 
   // Define a function to create editable options
@@ -466,7 +466,9 @@ export class EditCLMParamView extends DOMWidgetView {
         }
     }
     // Only take the first this.model.get('sel_size') items because the rest would be 'NaN'.
-    return arr_ret.slice(0, this.model.get('sel_size'));
+    const ret_arr = arr_ret.slice(0, this.model.get('sel_size'));
+    //alert("*******option converted to list: " + ret_arr);
+    return ret_arr;
   }
 
   private _onreadbuttonClicked() {
@@ -477,10 +479,8 @@ export class EditCLMParamView extends DOMWidgetView {
   }
   private _onsavebuttonClicked() {
     return (_event: Event): void => {
-        console.log(this.model.get('saverequest'));
-        this.model.set('saverequest', 'save');
-        console.log(this.model.get('saverequest'));
-
+        // This six functions have to be invoked here,
+        // because whatever changed in the dropdown editing, does not invoke them.
         this._onSlatopInputChanged();
         this._onFlnrInputChanged();
         this._onFrootCNInputChanged();
@@ -488,6 +488,7 @@ export class EditCLMParamView extends DOMWidgetView {
         this._onLeafCNInputChanged();
         this._onRmortInputChanged();
         
+        this.model.set('saverequest', 'save');  
         this.model.save_changes();
     };
   }

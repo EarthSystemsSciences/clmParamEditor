@@ -160,6 +160,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
             print(f"Copying the original nc file from {self.clmnc_file}...to {new_ncfile}")
             if new_ncfile == os.path.basename(new_ncfile):
                 new_ncfile = os.path.join(os.path.dirname(self.clmnc_file), new_ncfile)
+
             self.create_file_from_source(self.clmnc_file, new_ncfile)
 
             if os.path.exists(new_ncfile):
@@ -171,14 +172,13 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
                 nc_dataset.variables['frootcn'][:] = self.frootcn
                 nc_dataset.variables['froot_leaf'][:] = self.froot_leaf
                 nc_dataset.variables['leafcn'][:] = self.leafcn
-                print(f'New parameter file has been saved to {new_ncfile}')
                 nc_dataset.close()
+                print(f'New parameter file has been saved to {new_ncfile}')
 
             else:
                 print(f'File: {new_ncfile} does not exist!')
         else:
             print(f'File: {new_ncfile} is null!')
-
         self.saverequest = 'clickable'
 
     def create_file_from_source(self, src_file, dst_file):
