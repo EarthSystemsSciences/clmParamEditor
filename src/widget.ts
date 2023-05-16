@@ -345,7 +345,7 @@ export class EditCLMParamView extends DOMWidgetView {
   // get (Python -> JavaScript update)
   private _onUsernameChanged() {
     const newusernm = this.model.get('username')
-    //alert('Username' + ' is changed to new value: ' + newusernm);
+    alert('Username' + ' is changed to new value: ' + newusernm);
   }
   private _onOriginalFileChanged() {
     const neworgclm = this.model.get('clmnc_file')
