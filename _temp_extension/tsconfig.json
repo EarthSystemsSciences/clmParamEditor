@@ -16,7 +16,6 @@
     "outDir": "lib",
     "rootDir": "src",
     "strict": true,
-    "strictPropertyInitialization": false,
     "strictNullChecks": true,
     "target": "ES2018",
     "types": []

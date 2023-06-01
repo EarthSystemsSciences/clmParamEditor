@@ -16,7 +16,6 @@ import netCDF4
 import numpy as np
 import os
 import getpass
-import xarray as xr
 
 
 class EditCLMParamWidget(DOMWidget, HasTraits):

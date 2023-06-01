@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.0.5
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: qzhang@anl.gov
+author_name: qzhang
+data_format: string
+file_extension: ''
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: clmParamEditor
+mimetype: ''
+mimetype_name: ''
+project_short_description: A Custom Jupyter Widget Library
+python_name: clmParamEditor
+repository: https://github.com/myorg/clmParamEditor
+test: false
+viewer_name: ''
+
