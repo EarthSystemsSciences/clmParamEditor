@@ -33,7 +33,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
     readrequest = Unicode('clickable').tag(sync=True)
     saverequest = Unicode('clickable').tag(sync=True)
     
-    clmnc_file = Unicode('data/clm_params_files/clm_params_c180312.nc').tag(sync=True)
+    clmnc_file = Unicode('work/data/clm_params_c180312.nc').tag(sync=True)
     newclmnc_file = Unicode('new_clm_file.nc').tag(sync=True)
     savestatus = Unicode('').tag(sync=True)
     
@@ -118,7 +118,7 @@ class EditCLMParamWidget(DOMWidget, HasTraits):
     def __init__(self, **kwargs):
         # print("initializing the widget...")
         super().__init__(**kwargs)
-        self.read_netCDF_data("./data/clm_params_files/clm_params_c180312.nc")
+        self.read_netCDF_data("work/data/clm_params_c180312.nc")
         self.username = getpass.getuser()
 
         """

@@ -68,7 +68,7 @@
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
     "@jupyter-widgets/base-manager": "^1.0.2",
-    "@jupyterlab/builder": "^4.0.0",
+    "@jupyterlab/builder": "^3.0.0",
     "@lumino/application": "^2.0.1",
     "@lumino/widgets": "^2.0.1",
     "@types/jest": "^26.0.0",
